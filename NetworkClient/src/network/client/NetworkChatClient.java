@@ -88,6 +88,8 @@ public class NetworkChatClient extends Application {
         authDialogStage.close();
         primaryStage.show();
         primaryStage.setTitle(network.getUsername());
+        chatController.fromHistoryLog();
         network.waitMessage(chatController);
+
     }
 }

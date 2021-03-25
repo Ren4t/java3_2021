@@ -15,6 +15,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
@@ -98,9 +100,35 @@ public class ChatController {
         chatHistory.appendText(message);
         chatHistory.appendText(System.lineSeparator());
         chatHistory.appendText(System.lineSeparator());
+        toHistoryLog(message);
+
     }
 
     public static void showError(String errorDetails, String errorTitle) {
         NetworkChatClient.showNetworkErrorAlert(errorDetails,errorTitle);
+    }
+
+    public void toHistoryLog (String message){
+        byte[] outData = message.getBytes();
+        try (FileOutputStream out = new FileOutputStream("chatHistoryLog.txt",true)) {
+            out.write(outData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void fromHistoryLog(){
+
+        byte[] buf = new byte[20];
+
+        try (FileInputStream in = new FileInputStream("chatHistoryLog.txt")) {
+            while ((in.read(buf)) > 0) {
+                chatHistory.appendText(new String(buf));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
