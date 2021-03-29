@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
 
 public class ClientHandler {
     private static final String AUTH_CMD_PREFIX = "/auth";
@@ -33,11 +34,11 @@ public class ClientHandler {
         this.clientSocket = clientSocket;
     }
 
-    public void handle() throws IOException {
+    public void handle(ExecutorService executorService) throws IOException {
         in = new DataInputStream(clientSocket.getInputStream());
         out = new DataOutputStream(clientSocket.getOutputStream());
 
-        new Thread(new Runnable() {
+        executorService.execute( new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -49,7 +50,7 @@ public class ClientHandler {
                     closeConnection();
                 }
             }
-        }).start();
+        }));
     }
 
     public String getUsername() {

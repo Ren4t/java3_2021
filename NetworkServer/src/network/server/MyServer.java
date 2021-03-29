@@ -9,14 +9,19 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MyServer {
 
     private final ServerSocket serverSocket;
     private final List<ClientHandler> clients = new ArrayList<>();
     private final AuthServise authServise;
+    ExecutorService executorService;
 
     public MyServer(int port) throws IOException {
+        executorService = Executors.newFixedThreadPool(2);
         this.serverSocket = new ServerSocket(port);
         this.authServise = new BaseAuthService();
     }
@@ -34,6 +39,7 @@ public class MyServer {
         } finally {
             authServise.stop();
             serverSocket.close();
+            executorService.shutdown();
         }
     }
 
@@ -47,7 +53,7 @@ public class MyServer {
     private void processClientConnection(Socket clientSocket) throws IOException {
         ClientHandler clientHandler = new ClientHandler(this, clientSocket);
         //clients.add(clientHandler);
-        clientHandler.handle();
+        clientHandler.handle(executorService);
     }
 
     public AuthServise getAuthServise() {
