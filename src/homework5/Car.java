@@ -1,5 +1,6 @@
 package homework5;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
 
@@ -15,6 +16,8 @@ public class Car implements Runnable {
     private String name;
     CyclicBarrier cb;
     Semaphore sm;
+    CountDownLatch cdlStart;
+    CountDownLatch cdlStop;
 
     public String getName() {
         return name;
@@ -24,7 +27,9 @@ public class Car implements Runnable {
         return speed;
     }
 
-    public Car(Semaphore sm, CyclicBarrier cb, Race race, int speed) {
+    public Car(CountDownLatch cdlStart, CountDownLatch cdlStop, Semaphore sm, CyclicBarrier cb, Race race, int speed) {
+        this.cdlStart = cdlStart;
+        this.cdlStop = cdlStop;
         this.sm = sm;
         this.cb = cb;
         this.race = race;
@@ -41,11 +46,13 @@ public class Car implements Runnable {
             cb.await();
             System.out.println(this.name + " готов");
             cb.await();
+            cdlStart.countDown();
         } catch (Exception e) {
             e.printStackTrace();
         }
         for (int i = 0; i < race.getStages().size(); i++) {
-            race.getStages().get(i).go(this,sm);
+            race.getStages().get(i).go(this, sm);
+            cdlStop.countDown();
         }
     }
 }
